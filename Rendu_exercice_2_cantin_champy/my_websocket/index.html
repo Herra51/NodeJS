@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat Room</title>
+</head>
+
+<body>
+    <h1>Chat WebSocket</h1>
+    <input id="username" placeholder="Votre nom..." />
+    <input id="message" placeholder="Votre message..." />
+    <button onclick="send()">Envoyer</button>
+    <ul id="chat"></ul>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:3000');
+        const chat = document.getElementById('chat');
+
+        socket.onmessage = async (e) => {
+            const li = document.createElement('li');
+
+            if (e.data instanceof Blob) {
+                const text = await e.data.text();
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                li.textContent = `[${time}] : ${text}`;
+            } else {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                li.textContent = `[${time}] : ${e.data}`;
+            }
+
+            chat.appendChild(li);
+        };
+
+        function send() {
+            const input = document.getElementById('message');
+            const username = document.getElementById('username').value;
+            if (username) {
+                input.value = `${username} : ${input.value}`;
+            } else {
+                input.value = `Anonyme : ${input.value}`;
+            }
+            socket.send(input.value);
+            input.value = '';
+        }
+    </script>
+</body>
+
+</html>
